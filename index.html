@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>박서우의 첫 번째 생일에 초대합니다</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    
+    <!-- =================================================================== -->
+    <!-- Google Maps Embed 사용 (무료, API키 불필요) -->
+    <!-- 가장 전문적이고 깔끔한 지도 서비스로 최종 결정했습니다. -->
+    <!-- =================================================================== -->
+    <!-- Google Maps Embed (무료, API키 불필요) -->
+    <!-- 가장 전문적이고 깔끔한 지도 서비스 -->
+    
+    <style>
+        body { 
+            font-family: 'Noto Sans KR', sans-serif; 
+            background: linear-gradient(135deg, #FFE5E5 0%, #F8F7F5 50%, #E8F4FD 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        .font-gowun { font-family: 'Gowun Dodum', sans-serif; }
+        .invitation-container { 
+            max-width: 700px; 
+            margin: 0 auto; 
+            background-color: #FFFFFF; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12); 
+            overflow: hidden; 
+            border-radius: 20px; 
+            position: relative;
+        }
+        .invitation-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #FFB6C1, #87CEEB, #DDA0DD);
+            z-index: 10;
+        }
+        .reveal { 
+            position: relative; 
+            transform: translateY(80px); 
+            opacity: 0; 
+            transition: 1.2s all cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .reveal.active { transform: translateY(0); opacity: 1; }
+        .section-title { 
+            display: inline-block; 
+            letter-spacing: 2px; 
+            color: #333; 
+            position: relative;
+            background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+        }
+        .section-title::after { 
+            content: ''; 
+            display: block; 
+            width: 100%; 
+            height: 2px; 
+            background: linear-gradient(90deg, #FFB6C1, #87CEEB); 
+            margin-top: 12px; 
+            border-radius: 1px;
+        }
+
+        
+
+        .d-day-box { background-color: rgba(0,0,0,0.2); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1); }
+        
+        /* 갤러리 그리드 & 모달 */
+        .gallery-img { 
+            cursor: pointer; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .gallery-img:hover { 
+            transform: scale(1.08) rotate(1deg); 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15); 
+            z-index: 10;
+            position: relative;
+        }
+        .modal { position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; }
+        .modal-content { margin: auto; display: block; max-width: 80%; max-height: 80%; }
+        .modal-close { position: absolute; top: 25px; right: 35px; color: #f1f1f1; font-size: 40px; font-weight: bold; transition: 0.3s; }
+        .modal-close:hover, .modal-close:focus { color: #bbb; text-decoration: none; cursor: pointer; }
+        
+        /* 모달 슬라이드 네비게이션 */
+        .modal-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; z-index: 1002; font-size: 20px; }
+        .modal-nav:hover { background: rgba(0,0,0,0.8); transform: translateY(-50%) scale(1.1); }
+        .modal-nav.prev { left: 30px; }
+        .modal-nav.next { right: 30px; }
+        .modal-counter { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 25px; font-size: 16px; font-weight: bold; z-index: 1002; }
+        
+        /* Google Maps 스타일 */
+        #map { border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); overflow: hidden; border: 2px solid #f0f0f0; }
+        #map iframe { border: none; width: 100%; height: 100%; }
+
+    </style>
+</head>
+<body class="pt-8 pb-8 sm:pt-12 sm:pb-12">
+
+    <div class="invitation-container">
+        <!-- 메인 섹션 -->
+        <section class="relative text-center h-[90vh] flex flex-col justify-between items-center text-white reveal">
+            <div class="absolute inset-0 bg-black opacity-20 z-10"></div>
+            <img src="https://i.postimg.cc/8C6Vh0c0/Kakao-Talk-20250702-213838564.jpg" alt="박서우 아기 돌사진" class="absolute inset-0 w-full h-full object-cover">
+            <div class="relative z-20 p-8 pt-16 w-full"><p class="font-gowun text-xl">첫 번째 생일</p><h1 class="font-gowun text-5xl sm:text-6xl font-bold my-4 tracking-wider">박서우</h1><div class="w-12 h-px bg-white mx-auto my-6"></div><p class="text-lg">2025년 8월 2일 토요일, 오후 6시</p><p class="mt-1">대구광역시 달서구 감삼동 521, 3층</p><p class="mt-1 text-yellow-300 font-semibold">제니스뷔페 달서점 아트홀</p></div>
+            <div id="d-day-counter" class="relative z-20 p-4 mb-8 rounded-lg d-day-box text-lg font-gowun w-11/12 max-w-md"></div>
+        </section>
+
+        <!-- 초대글 -->
+        <section class="py-20 px-6 text-center reveal">
+            <h2 class="font-gowun text-2xl section-title">초대합니다</h2>
+            <p class="mt-10 text-gray-600 leading-loose">사랑 안에서 예쁜 이름으로 불린 지<br>어느덧 일 년이라는 시간이 흘러<br>저희의 보물, 서우가 첫 생일을 맞았습니다.<br><br>조그마한 손짓 하나, 작은 미소 하나에도<br>세상을 다 가진 듯 기쁘고 행복했습니다.<br><br>서우가 내딛는 첫걸음에<br>소중한 분들을 모시고자 하오니<br>귀한 걸음 하시어 자리를 빛내주시길 바랍니다.</p>
+            <div class="mt-12 text-lg font-bold text-gray-800"><p>아빠 박용호 & 엄마 천은희 올림</p></div>
+        </section>
+        
+        <!-- 아기 프로필 -->
+        <section class="py-20 px-6 bg-gradient-to-br from-yellow-50 to-orange-50 text-center reveal">
+            <h2 class="font-gowun text-2xl section-title">사랑스러운 서우</h2>
+            <div class="mt-10 max-w-md mx-auto bg-white p-8 rounded-2xl shadow-2xl border border-yellow-100 relative overflow-hidden">
+                <!-- 배경 장식 -->
+                <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-yellow-100/30 to-orange-100/30 pointer-events-none"></div>
+                <div class="absolute top-4 right-4 text-6xl opacity-10">🎂</div>
+                <div class="absolute bottom-4 left-4 text-4xl opacity-10">🎈</div>
+                
+                <div class="relative z-10">
+                    <div class="flex items-center justify-center space-x-4 mb-6">
+                        <div class="animate-pulse">
+                            <i class="fas fa-star text-yellow-400 text-3xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">박서우</h3>
+                        <div class="animate-pulse">
+                            <i class="fas fa-star text-yellow-400 text-3xl"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-xl p-4 mb-6">
+                        <p class="text-gray-700 leading-relaxed">
+                            "밝을 <strong class="font-semibold text-yellow-700">서</strong>, 높일 <strong class="font-semibold text-orange-700">우</strong>"<br>
+                            세상을 밝게 비추는 사람,<br>
+                            스스로의 가치를 높이는 사람으로 자라길 바라는<br>
+                            마음을 담았습니다.
+                        </p>
+                    </div>
+                    
+                    <div class="flex justify-center items-center space-x-6 text-gray-600">
+                        <div class="text-center">
+                            <i class="fas fa-birthday-cake text-pink-400 text-xl mb-2"></i>
+                            <p class="text-sm font-medium">2024년 8월 2일</p>
+                        </div>
+                        <div class="text-center">
+                            <i class="fas fa-weight text-blue-400 text-xl mb-2"></i>
+                            <p class="text-sm font-medium">3.17kg</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 갤러리 (그리드) -->
+        <section class="py-20 px-6 bg-gray-50 reveal">
+            <h2 class="font-gowun text-2xl text-center section-title">서우의 작은 갤러리</h2>
+            <p class="text-center text-gray-500 mt-4">사진을 클릭하면 크게 보실 수 있습니다.</p>
+            <div id="gallery-grid" class="grid grid-cols-3 gap-2 md:gap-4 mt-10 max-w-3xl mx-auto">
+                <img src="https://i.postimg.cc/CKn5tZpV/Kakao-Talk-20250704-114917880.jpg" alt="갤러리 사진 1" class="gallery-img w-full h-auto aspect-square object-cover rounded-md shadow-sm">
+                <img src="https://i.postimg.cc/Y919rJSn/Kakao-Talk-20250704-114917880-01.jpg" alt="갤러리 사진 2" class="gallery-img w-full h-auto aspect-square object-cover rounded-md shadow-sm">
+                <img src="https://i.postimg.cc/KjxYRJkZ/Kakao-Talk-20250704-114917880-02.jpg" alt="갤러리 사진 3" class="gallery-img w-full h-auto aspect-square object-cover rounded-md shadow-sm">
+                <img src="https://i.postimg.cc/15Wz309Q/Kakao-Talk-20250704-114917880-03.jpg" alt="갤러리 사진 4" class="gallery-img w-full h-auto aspect-square object-cover rounded-md shadow-sm">
+                <img src="https://i.postimg.cc/Z52KrTBs/Kakao-Talk-20250704-114917880-04.jpg" alt="갤러리 사진 5" class="gallery-img w-full h-auto aspect-square object-cover rounded-md shadow-sm">
+                <img src="https://i.postimg.cc/SspSvDGW/Kakao-Talk-20250704-114917880-05.jpg" alt="갤러리 사진 6" class="gallery-img w-full h-auto aspect-square object-cover rounded-md shadow-sm">
+                <img src="https://i.postimg.cc/xTF020Rj/Kakao-Talk-20250704-114917880-06.jpg" alt="갤러리 사진 7" class="gallery-img w-full h-auto aspect-square object-cover rounded-md shadow-sm">
+                <img src="https://i.postimg.cc/XYGnNTHf/Kakao-Talk-20250704-114917880-07.jpg" alt="갤러리 사진 8" class="gallery-img w-full h-auto aspect-square object-cover rounded-md shadow-sm">
+                <img src="https://i.postimg.cc/LsjRLjMh/Kakao-Talk-20250704-114917880-08.jpg" alt="갤러리 사진 9" class="gallery-img w-full h-auto aspect-square object-cover rounded-md shadow-sm">
+            </div>
+        </section>
+        
+        <!-- 갤러리 모달 -->
+        <div id="gallery-modal" class="modal">
+            <span class="modal-close">&times;</span>
+            <img class="modal-content" id="modal-image">
+            
+            <!-- 모달 네비게이션 버튼 -->
+            <button class="modal-nav prev" id="modal-prev">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="modal-nav next" id="modal-next">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            
+            <!-- 모달 카운터 -->
+            <div class="modal-counter" id="modal-counter">1 / 9</div>
+        </div>
+        
+        <!-- 오시는 길 -->
+        <section class="py-20 px-6 text-center reveal">
+            <h2 class="font-gowun text-2xl section-title">오시는 길</h2>
+            <div class="mt-10 text-gray-700"><p class="text-xl font-semibold">2025년 8월 2일 토요일, 오후 6시</p><p class="mt-2 text-lg">대구광역시 달서구 감삼동 521, 3층</p><p class="mt-1 text-xl font-bold text-blue-600">제니스뷔페 달서점 아트홀</p></div>
+            <!-- Google Maps 임베드 -->
+            <div id="map" class="mt-8 w-full h-80 max-w-xl mx-auto">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3229.5!2d128.53666!3d35.845595!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2z64yA6rWs6rSR7Jet7IucIOuLrOyEnOq1rCDqsJTsgrzrj5kg52mhIOygnOuLiOyKpOuzt-qOmCDri6zshJzsoJA!5e0!3m2!1sko!2skr!4v1735900000000"
+                    width="100%" 
+                    height="100%" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade"
+                    title="제니스뷔페 달서점 아트홀 - 박서우 첫 생일 장소">
+                </iframe>
+            </div>
+            <!-- 네비게이션 버튼들 -->
+            <div class="mt-6 space-y-3 max-w-sm mx-auto">
+                <a href="https://map.kakao.com/link/to/제니스뷔페 달서점,35.845595,128.536660" target="_blank" 
+                   class="w-full text-center py-4 rounded-2xl bg-gradient-to-r from-yellow-400 to-orange-400 text-black font-bold shadow-lg hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 flex items-center justify-center gap-2 transform hover:scale-105">
+                    <i class="fas fa-map-marked-alt text-lg"></i>카카오내비로 길찾기
+                </a>
+                <a href="https://map.naver.com/v5/search/제니스뷔페%20달서점" target="_blank" 
+                   class="w-full text-center py-4 rounded-2xl bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold shadow-lg hover:from-green-600 hover:to-teal-600 transition-all duration-300 flex items-center justify-center gap-2 transform hover:scale-105">
+                    <i class="fas fa-route text-lg"></i>네이버 지도
+                </a>
+            </div>
+        </section>
+        
+        <!-- 마음 전하실 곳 -->
+        <section class="py-20 px-6 bg-gray-50 text-center reveal">
+            <h2 class="font-gowun text-2xl section-title">마음 전하실 곳</h2>
+            <p class="mt-10 text-gray-600 leading-relaxed">참석이 어려우시더라도 축하해주시는<br>따뜻한 마음 감사히 받겠습니다.</p>
+            <div class="space-y-6 mt-8 max-w-sm mx-auto">
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-blue-100 relative overflow-hidden group hover:shadow-xl transition-all duration-300">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-blue-600"></div>
+                    <div class="absolute top-2 right-2 text-2xl opacity-20 group-hover:opacity-30 transition-opacity">👨‍👩‍👧‍👦</div>
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-blue-600"></i>
+                        </div>
+                        <p class="font-bold text-gray-800">아빠 - 박용호</p>
+                    </div>
+                    <p class="text-gray-600 mb-4 font-medium text-sm bg-gray-50 p-2 rounded-lg">농협은행 352-0785-1088-23</p>
+                    <button onclick="copyToClipboard('3520785108823', this)" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105 font-medium">
+                        <i class="fas fa-copy mr-2"></i>계좌번호 복사
+                    </button>
+                </div>
+                
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-pink-100 relative overflow-hidden group hover:shadow-xl transition-all duration-300">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-400 to-pink-600"></div>
+                    <div class="absolute top-2 right-2 text-2xl opacity-20 group-hover:opacity-30 transition-opacity">💕</div>
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-heart text-pink-600"></i>
+                        </div>
+                        <p class="font-bold text-gray-800">엄마 - 천은희</p>
+                    </div>
+                    <p class="text-gray-600 mb-4 font-medium text-sm bg-gray-50 p-2 rounded-lg">국민은행 910-4370-1210</p>
+                    <button onclick="copyToClipboard('91043701210', this)" class="w-full bg-gradient-to-r from-pink-500 to-pink-600 text-white px-4 py-2 rounded-xl hover:from-pink-600 hover:to-pink-700 transition-all transform hover:scale-105 font-medium">
+                        <i class="fas fa-copy mr-2"></i>계좌번호 복사
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 공유하기 -->
+        <section class="py-20 px-6 text-center reveal">
+            <h2 class="font-gowun text-2xl section-title">초대장 공유하기</h2>
+            <div class="mt-10 flex justify-center items-center">
+                <button onclick="copyUrl()" class="bg-gradient-to-r from-gray-600 to-gray-800 text-white font-bold py-3 px-6 rounded-xl flex items-center gap-2 shadow-lg hover:from-gray-700 hover:to-gray-900 transition-all transform hover:scale-105">
+                    <i class="fas fa-link"></i>링크 복사
+                </button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center py-10 bg-white"><p class="text-gray-500">우리 서우의 첫 번째 생일에 함께해주셔서 감사합니다.</p></footer>
+    </div>
+
+    <!-- 배경 음악 -->
+    <audio id="bg-music" loop autoplay muted>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // --- 전역 함수 ---
+        window.copyToClipboard = (text, buttonElement) => {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = buttonElement.innerText;
+                buttonElement.innerText = '복사 완료!';
+                setTimeout(() => { buttonElement.innerText = originalText; }, 2000);
+            });
+        };
+        
+        window.copyUrl = () => {
+            const copyButton = document.querySelector('button[onclick="copyUrl()"]');
+            window.copyToClipboard(window.location.href, copyButton);
+        };
+
+        // 배경음악 재생
+        const startBgMusic = () => {
+            const bgMusic = document.getElementById('bg-music');
+            if (bgMusic) {
+                bgMusic.muted = false;
+                bgMusic.play().catch(e => console.log('음악 재생 실패:', e));
+            }
+        };
+
+        // 첫 상호작용 시 배경음악 시작
+        document.addEventListener('click', startBgMusic, { once: true });
+        document.addEventListener('touchstart', startBgMusic, { once: true });
+        
+
+    
+                // --- 페이지 로드 후 실행 ---
+        document.addEventListener('DOMContentLoaded', () => {
+        
+            // --- UI 초기화 ---
+            function reveal() {
+                document.querySelectorAll(".reveal").forEach(el => {
+                    const windowHeight = window.innerHeight;
+                    const elementTop = el.getBoundingClientRect().top;
+                    if (elementTop < windowHeight - 100) el.classList.add("active");
+                });
+            }
+            window.addEventListener("scroll", reveal);
+            reveal();
+
+            const dDayCounter = document.getElementById('d-day-counter');
+            if (dDayCounter) {
+                const eventDate = new Date("2025-08-02T18:00:00").getTime();
+                const intervalId = setInterval(() => {
+                    const now = new Date().getTime();
+                    const distance = eventDate - now;
+                    if (distance < 0) {
+                        dDayCounter.innerHTML = "서우의 첫 생일을 축하합니다!";
+                        clearInterval(intervalId);
+                    } else {
+                        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                        dDayCounter.innerHTML = `서우의 첫 생일까지 <strong class="text-xl">${days}</strong>일 <strong class="text-xl">${hours}</strong>시간 <strong class="text-xl">${minutes}</strong>분 <strong class="text-xl">${seconds}</strong>초`;
+                    }
+                }, 1000);
+            }
+            
+            // 갤러리 모달
+            const galleryGrid = document.getElementById('gallery-grid');
+            const modal = document.getElementById('gallery-modal');
+            const modalImg = document.getElementById('modal-image');
+            const modalPrev = document.getElementById('modal-prev');
+            const modalNext = document.getElementById('modal-next');
+            const modalCounter = document.getElementById('modal-counter');
+            const closeBtn = document.querySelector('.modal-close');
+            
+            // 갤러리 이미지 배열
+            const galleryImages = [
+                'https://i.postimg.cc/CKn5tZpV/Kakao-Talk-20250704-114917880.jpg',
+                'https://i.postimg.cc/Y919rJSn/Kakao-Talk-20250704-114917880-01.jpg',
+                'https://i.postimg.cc/KjxYRJkZ/Kakao-Talk-20250704-114917880-02.jpg',
+                'https://i.postimg.cc/15Wz309Q/Kakao-Talk-20250704-114917880-03.jpg',
+                'https://i.postimg.cc/Z52KrTBs/Kakao-Talk-20250704-114917880-04.jpg',
+                'https://i.postimg.cc/SspSvDGW/Kakao-Talk-20250704-114917880-05.jpg',
+                'https://i.postimg.cc/xTF020Rj/Kakao-Talk-20250704-114917880-06.jpg',
+                'https://i.postimg.cc/XYGnNTHf/Kakao-Talk-20250704-114917880-07.jpg',
+                'https://i.postimg.cc/LsjRLjMh/Kakao-Talk-20250704-114917880-08.jpg'
+            ];
+            
+            let currentModalIndex = 0;
+            
+            // 모달에서 이미지 변경 함수
+            const changeModalImage = (index) => {
+                currentModalIndex = index;
+                modalImg.src = galleryImages[index];
+                modalCounter.textContent = `${index + 1} / ${galleryImages.length}`;
+            };
+            
+            // 모달 이전/다음 이미지
+            const showPrevImage = () => {
+                const newIndex = currentModalIndex > 0 ? currentModalIndex - 1 : galleryImages.length - 1;
+                changeModalImage(newIndex);
+            };
+            
+            const showNextImage = () => {
+                const newIndex = currentModalIndex < galleryImages.length - 1 ? currentModalIndex + 1 : 0;
+                changeModalImage(newIndex);
+            };
+            
+            if (galleryGrid && modal) {
+                // 갤러리 이미지 클릭 시 모달 열기
+                galleryGrid.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'IMG') {
+                        const clickedIndex = Array.from(galleryGrid.children).indexOf(e.target);
+                        currentModalIndex = clickedIndex;
+                        modal.style.display = "flex";
+                        changeModalImage(clickedIndex);
+                    }
+                });
+
+                // 모달 닫기
+                closeBtn.addEventListener('click', () => {
+                    modal.style.display = "none";
+                });
+
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.style.display = "none";
+                    }
+                });
+                
+                // 모달 네비게이션 버튼
+                if (modalPrev && modalNext) {
+                    modalPrev.addEventListener('click', showPrevImage);
+                    modalNext.addEventListener('click', showNextImage);
+                }
+                
+                // 키보드 네비게이션 (모달이 열려있을 때만)
+                document.addEventListener('keydown', (e) => {
+                    if (modal.style.display === 'flex') {
+                        if (e.key === 'ArrowLeft') {
+                            showPrevImage();
+                        } else if (e.key === 'ArrowRight') {
+                            showNextImage();
+                        } else if (e.key === 'Escape') {
+                            modal.style.display = "none";
+                        }
+                    }
+                });
+            }
+
+
+
+            // --- Google Maps Embed ---
+            // Google Maps iframe은 별도의 JavaScript 설정이 필요하지 않습니다.
+            // 깔끔하고 전문적인 지도가 자동으로 로드됩니다.
+            console.log('🗺️ Google Maps 로드 완료 - 전문적이고 깔끔한 지도 서비스');
+
+
+        });
+    </script>
+</body>
+</html>
